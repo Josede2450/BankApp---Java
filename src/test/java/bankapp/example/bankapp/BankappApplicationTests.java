@@ -5,11 +5,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("test") // <- this tells Spring to load application-test.properties
+@ActiveProfiles("test")
 class BankappApplicationTests {
-
 	@Test
-	void contextLoads() {
-		assert true;
-	}
+	void contextLoads() {}
 }
