@@ -22,37 +22,14 @@ pipeline {
 
     stage('Build & Test') {
       steps {
-        withEnv([
-          "DB_URL=${env.DB_URL}",
-          "DB_USERNAME=${env.DB_USERNAME}",
-          "DB_PASSWORD=${env.DB_PASSWORD}",
-          "GOOGLE_CLIENT_ID=${env.GOOGLE_CLIENT_ID}",
-          "GOOGLE_CLIENT_SECRET=${env.GOOGLE_CLIENT_SECRET}",
-          "EXPERIAN_CLIENT_ID=${env.EXPERIAN_CLIENT_ID}",
-          "EXPERIAN_CLIENT_SECRET=${env.EXPERIAN_CLIENT_SECRET}",
-          "MAIL_USERNAME=${env.MAIL_USERNAME}",
-          "MAIL_PASSWORD=${env.MAIL_PASSWORD}"
-        ]) {
-          bat '''
-            set DB_URL=%DB_URL%
-            set DB_USERNAME=%DB_USERNAME%
-            set DB_PASSWORD=%DB_PASSWORD%
-            set GOOGLE_CLIENT_ID=%GOOGLE_CLIENT_ID%
-            set GOOGLE_CLIENT_SECRET=%GOOGLE_CLIENT_SECRET%
-            set EXPERIAN_CLIENT_ID=%EXPERIAN_CLIENT_ID%
-            set EXPERIAN_CLIENT_SECRET=%EXPERIAN_CLIENT_SECRET%
-            set MAIL_USERNAME=%MAIL_USERNAME%
-            set MAIL_PASSWORD=%MAIL_PASSWORD%
-            .\\mvnw.cmd clean install -DskipTests=false
-          '''
-        }
+        bat '.\\mvnw.cmd clean install -DskipTests=false'
       }
     }
 
     stage('Cleanup') {
       steps {
         bat '''
-        for /f "tokens=5" %%a in ('netstat -aon ^| find ":8080" ^| find "LISTENING"') do taskkill /F /PID %%a
+          for /f "tokens=5" %%a in ('netstat -aon ^| find ":8080" ^| find "LISTENING"') do taskkill /F /PID %%a
         '''
       }
     }
