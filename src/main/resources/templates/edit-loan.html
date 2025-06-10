@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Loan</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">BankApp</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav w-100 d-flex justify-content-evenly">
+        <li class="nav-item">
+          <a class="nav-link active" th:href="@{/home/page}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/transactions/initiate}">Transactions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/loans/page}">Loans</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Management
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" th:href="@{/management/dashboard}">Dashboard</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn btn-link nav-link text-danger">Logout</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mt-5">
+  <h2 class="mb-4">Edit Loan</h2>
+
+  <form th:action="@{'/loans/edit/' + ${loan.loanId}}" th:object="${loan}" method="post">
+    <div class="mb-3">
+      <label class="form-label">Loan ID</label>
+      <input type="text" th:field="*{loanId}" class="form-control" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Loan Type</label>
+      <input type="text" th:field="*{loanType}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Status</label>
+
+      <!-- ✅ Editable dropdown if still Pending -->
+      <select th:if="${loan.loanStatus == 'Pending'}"
+              th:field="*{loanStatus}" class="form-select" required>
+        <option value="Pending" th:selected="${loan.loanStatus == 'Pending'}">Pending</option>
+        <option value="Approved">Approved</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+
+      <!-- ✅ Read-only input if already Approved or Rejected -->
+      <input th:if="${loan.loanStatus != 'Pending'}"
+             type="text" class="form-control" th:value="${loan.loanStatus}" readonly>
+    </div>
+
+
+    <div class="mb-3">
+      <label class="form-label">Amount</label>
+      <input type="number" step="0.01" th:field="*{amount}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Interest Rate (%)</label>
+      <select th:field="*{interestRate}" class="form-select" required>
+        <option value="7" th:selected="${loan.interestRate == 7}">7%</option>
+        <option value="15" th:selected="${loan.interestRate == 15}">15%</option>
+        <option value="20" th:selected="${loan.interestRate == 20}">20%</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Loan Term</label>
+      <select th:field="*{loanTerm}" class="form-select" required>
+        <option value="12" th:selected="${loan.loanTerm == 12}">12 months (1 year)</option>
+        <option value="24" th:selected="${loan.loanTerm == 24}">24 months (2 years)</option>
+        <option value="36" th:selected="${loan.loanTerm == 36}">36 months (3 years)</option>
+        <option value="60" th:selected="${loan.loanTerm == 60}">60 months (5 years)</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Select Destination Account</label>
+      <select th:field="*{account.accountId}" class="form-select" required>
+        <option th:each="acc : ${accounts}"
+                th:value="${acc.accountId}"
+                th:text="${acc.accountNumber + ' - ' + acc.accountType}"
+                th:selected="${acc.accountId == loan.account.accountId}">
+        </option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Monthly Payment</label>
+      <input type="number" step="0.01" th:field="*{monthlyPayment}" class="form-control" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Remaining Amount</label>
+      <input type="number" step="0.01" th:field="*{remainingAmount}" class="form-control" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Amount Paid</label>
+      <input type="number" step="0.01" th:field="*{amountPaid}" class="form-control" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Expected Total</label>
+      <input type="number" step="0.01" th:field="*{expectedTotal}" class="form-control" readonly>
+    </div>
+
+
+    <div class="mb-3">
+      <label class="form-label">AutoPay Enabled</label>
+      <input type="checkbox" th:field="*{autoPayEnabled}" class="form-check-input">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">AutoPay Account ID</label>
+      <input type="text" th:field="*{autoPayAccount.accountId}" class="form-control" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Description</label>
+      <input type="text" th:field="*{description}" class="form-control" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Created At</label>
+      <input type="text" th:value="${#temporals.format(loan.createdAt.toLocalDateTime(), 'yyyy-MM-dd HH:mm')}" class="form-control" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Updated At</label>
+      <input type="text" th:value="${#temporals.format(loan.updatedAt.toLocalDateTime(), 'yyyy-MM-dd HH:mm')}" class="form-control" readonly>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a th:href="@{/management/dashboard}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+</div>
+
+<!-- Loan Payments History -->
+<div class="container mt-5">
+  <h4>Payment History</h4>
+  <table class="table table-bordered table-striped mt-3">
+    <thead class="table-dark">
+    <tr>
+      <th>Payment ID</th>
+      <th>Amount</th>
+      <th>Payment Date</th>
+      <th>Payment Type</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="payment : ${payments}">
+      <td th:text="${payment.paymentId}"></td>
+      <td th:text="${payment.amount}"></td>
+      <td th:text="${#temporals.format(payment.paymentTime.toLocalDateTime(), 'yyyy-MM-dd HH:mm')}"></td>
+      <td th:text="${payment.paymentType}"></td>
+    </tr>
+
+    <tr th:if="${payments.isEmpty()}">
+      <td colspan="5" class="text-center">No payments recorded for this loan.</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

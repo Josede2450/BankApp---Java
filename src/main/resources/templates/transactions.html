@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BankApp - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+    <div class="container-fluid">
+
+        <a class="navbar-brand" href="#">BankApp</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav w-100 d-flex justify-content-evenly">
+
+                <!-- Static Links -->
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" th:href="@{/home/page}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/transactions/initiate}">Transactions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/loans/page}">Loans</a>
+                </li>
+
+
+                <!-- Example of Role-based dropdown logic (if using Thymeleaf security) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Management
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/management/dashboard}">Dashboard</a></li>
+                    </ul>
+                </li>
+
+                <!-- Logout Button -->
+                <li class="nav-item">
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="btn btn-link nav-link text-danger" style="text-decoration: none;">Logout</button>
+                    </form>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Initiate a Transaction</h2>
+
+    <!-- Search Bar -->
+    <form th:action="@{/transactions/search}" method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" class="form-control" name="query" placeholder="Search user by name or email" required>
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <!-- Select User and Make Transaction -->
+    <div th:if="${!#lists.isEmpty(users)}">
+        <form th:action="@{/transactions/send}" method="post" class="border p-4 rounded shadow-sm">
+
+            <!-- Sender Account Dropdown -->
+            <div class="mb-3">
+                <label for="senderAccountId" class="form-label">Select Your Account:</label>
+                <select class="form-select" name="senderAccountId" id="senderAccountId" required>
+                    <option th:each="acct : ${userAccounts}"
+                            th:if="${acct.status == 'Active'}"
+                            th:value="${acct.accountId}"
+                            th:text="${'Account #' + acct.accountId + ' (Balance: $' + acct.balance + ')'}">
+                    </option>
+
+                </select>
+            </div>
+
+            <!-- Recipient Dropdown -->
+            <div class="mb-3">
+                <label for="recipientId" class="form-label">Select Recipient:</label>
+                <select class="form-select" name="recipientId" id="recipientId" required>
+                    <option th:each="user : ${users}"
+                            th:value="${user.userId}"
+                            th:text="${user.firstName + ' ' + user.lastName + ' (' + user.email + ')'}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Amount Input -->
+            <div class="mb-3">
+                <label for="amount" class="form-label">Amount to Send:</label>
+                <input type="number" class="form-control" name="amount" id="amount" step="0.01" min="0.01" required>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Send Money</button>
+        </form>
+    </div>
+
+
+
+    <div th:if="${#lists.isEmpty(users)}" class="text-muted mt-4">
+        <p>No users found. Please use the search bar above.</p>
+    </div>
+
+
+    <!-- Transaction History Section -->
+    <div class="container mt-5">
+        <h3 class="mb-3 text-center">Your Transaction History</h3>
+
+        <div th:if="${#lists.isEmpty(transactions)}" class="alert alert-info text-center">
+            You have no transactions yet.
+        </div>
+
+        <table th:if="${!#lists.isEmpty(transactions)}" class="table table-striped table-bordered">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="txn : ${transactions}">
+                <td th:text="${txn.transactionId}"></td>
+                <td th:text="${txn.transactionType}"></td>
+                <td th:text="${txn.amount}"></td>
+                <td th:text="${txn.description}"></td>
+                <td th:text="${#dates.format(txn.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BankApp - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">BankApp</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav w-100 d-flex justify-content-evenly">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" th:href="@{/home/page}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/transactions/initiate}">Transactions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/loans/page}">Loans</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Management
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/management/dashboard}">Dashboard</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="btn btn-link nav-link text-danger" style="text-decoration: none;">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+
+    <!-- ✅ Flash success or error message -->
+    <div th:if="${success}" class="alert alert-success text-center fw-semibold" role="alert">
+        <span th:text="${success}">Success!</span>
+    </div>
+    <div th:if="${error}" class="alert alert-danger text-center fw-semibold" role="alert">
+        <span th:text="${error}">An error occurred</span>
+    </div>
+
+
+
+    <div class="text-center mt-4">
+        <a th:href="@{/loans/create}" class="btn btn-success mb-2">Request a Loan</a>
+        <div th:if="${#lists.isEmpty(loans)}">
+            <p class="text-muted mt-2">You have no loans yet.</p>
+        </div>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(loans)}" class="mt-4">
+        <h4 class="mb-3">Your Loans</h4>
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>Loan ID</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Message</th>
+                <th>Requested At</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="loan : ${loans}">
+                <td th:text="${loan.loanId}">1</td>
+                <td th:text="${loan.loanType}">Personal</td>
+                <td th:text="${loan.amount}">1000.00</td>
+                <td th:text="${loan.loanStatus}">Pending</td>
+                <td th:text="${loan.description}">For school fees</td>
+                <td>
+                    <p class="text-success fw-semibold" th:if="${loan.loanStatus == 'Approved'}"
+                       th:text="'Approved: Funds transferred to account #' + ${loan.account.accountNumber}"></p>
+                    <p class="text-danger fw-semibold" th:if="${loan.loanStatus == 'Rejected'}">
+                        ❌ Rejected: Please contact support.
+                    </p>
+                    <p class="text-secondary" th:if="${loan.loanStatus == 'Pending'}">
+                        ⏳ Awaiting approval.
+                    </p>
+                </td>
+                <td th:text="${#dates.format(loan.createdAt, 'yyyy-MM-dd HH:mm')}">2025-05-14</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Approved Loans Section -->
+    <div class="mt-5" th:if="${!#lists.isEmpty(loans)}">
+        <h4 class="mb-3 text-success">Your Approved Loans</h4>
+        <table class="table table-hover table-bordered">
+            <thead class="table-success">
+            <tr>
+                <th>Loan ID</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Monthly Payment</th>
+                <th>Remaining Balance</th>
+                <th>Interest Rate (%)</th>
+                <th>Loan Term (months)</th>
+                <th>Account Number</th>
+                <th>Late Fee</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="loan : ${loans}" th:if="${loan.loanStatus == 'Approved'}">
+                <td th:text="${loan.loanId}"></td>
+                <td th:text="${loan.loanType}"></td>
+                <td th:text="${#numbers.formatDecimal(loan.amount, 1, 'COMMA', 2, 'POINT')}"></td>
+                <td th:text="${#numbers.formatDecimal(loan.monthlyPayment, 1, 'COMMA', 2, 'POINT')}"></td>
+                <td th:text="${#numbers.formatDecimal(loan.remainingAmount, 1, 'COMMA', 2, 'POINT')}"></td>
+                <td th:text="${loan.interestRate}"></td>
+                <td th:text="${loan.loanTerm}"></td>
+                <td th:text="${loan.account.accountNumber}"></td>
+                <td th:class="${loan.lateFee != null and loan.lateFee.totalAccruedFee > 0 ? 'text-danger fw-bold' : ''}"
+                    th:text="${loan.lateFee != null ? #numbers.formatDecimal(loan.lateFee.totalAccruedFee, 1, 'COMMA', 2, 'POINT') : '0.00'}">
+                </td>
+                <td>
+                    <a th:href="@{'/loans/pay/' + ${loan.loanId}}" class="btn btn-sm btn-primary mb-1">Pay Now</a>
+
+                    <!-- ✅ View Payments Button -->
+                    <a th:href="@{'/loans/payments/' + ${loan.loanId}}" class="btn btn-sm btn-info mb-1 text-white">View Payments</a>
+
+                    <form th:action="@{'/loans/autopay/' + ${loan.loanId}}" method="post">
+                        <input type="hidden" name="enable" th:value="${!loan.autoPayEnabled}" />
+
+                        <div th:if="${!loan.autoPayEnabled}" class="mb-2">
+                            <label class="form-label text-sm">Select AutoPay Account</label>
+                            <select name="accountId" class="form-select form-select-sm" required>
+                                <option th:each="acc : ${loan.account.user.accounts}"
+                                        th:if="${acc.status == 'Active'}"
+                                        th:value="${acc.accountId}"
+                                        th:text="${acc.accountNumber + ' - $' + #numbers.formatDecimal(acc.balance, 1, 'COMMA', 2, 'POINT')}">
+                                </option>
+                            </select>
+
+                        </div>
+
+                        <button type="submit"
+                                th:text="${loan.autoPayEnabled ? 'Disable AutoPay' : 'Enable AutoPay'}"
+                                th:classappend="${loan.autoPayEnabled ? 'btn-danger' : 'btn-outline-success'}"
+                                class="btn btn-sm w-100">
+                        </button>
+                    </form>
+                </td>
+
+            </tr>
+            </tbody>
+        </table>
+        <p class="text-muted mt-2">
+            💡 Please ensure monthly payments are made on time to avoid late fees. Your loan payments are due on the last day of each month.
+        </p>
+    </div>
+
+    <!-- Paid Loans Section -->
+    <div class="mt-5" th:if="${!#lists.isEmpty(loans)}">
+        <h4 class="mb-3 text-muted">Your Paid Loans</h4>
+        <table class="table table-hover table-bordered">
+            <thead class="table-light">
+            <tr>
+                <th>Loan ID</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Total Paid</th>
+                <th>Expected Total</th> <!-- ✅ NEW COLUMN -->
+                <th>Interest Rate (%)</th>
+                <th>Loan Term</th>
+                <th>Account Number</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="loan : ${loans}" th:if="${loan.loanStatus == 'Paid'}">
+                <td th:text="${loan.loanId}"></td>
+                <td th:text="${loan.loanType}"></td>
+                <td th:text="${#numbers.formatDecimal(loan.amount, 1, 'COMMA', 2, 'POINT')}"></td>
+                <td th:text="${#numbers.formatDecimal(loan.amountPaid, 1, 'COMMA', 2, 'POINT')}"></td>
+                <td th:text="${#numbers.formatDecimal(loan.expectedTotal, 1, 'COMMA', 2, 'POINT')}"></td> <!-- ✅ NEW VALUE -->
+                <td th:text="${loan.interestRate}"></td>
+                <td th:text="${loan.loanTerm + ' months'}"></td>
+                <td th:text="${loan.account.accountNumber}"></td>
+                <td><span class="badge bg-success">Paid</span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
