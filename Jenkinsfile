@@ -1,12 +1,17 @@
 pipeline {
   agent any
 
-  environment {
-    // Environment variables from Jenkins credentials
-    DB_URL      = credentials('DB_URL')
+environment {
+    DB_URL = credentials('DB_URL')
     DB_USERNAME = credentials('DB_USERNAME')
     DB_PASSWORD = credentials('DB_PASSWORD')
-  }
+    GOOGLE_CLIENT_ID = credentials('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET = credentials('GOOGLE_CLIENT_SECRET')
+    EXPERIAN_CLIENT_ID = credentials('EXPERIAN_CLIENT_ID')
+    EXPERIAN_CLIENT_SECRET = credentials('EXPERIAN_CLIENT_SECRET')
+    MAIL_USERNAME = credentials('MAIL_USERNAME')
+    MAIL_PASSWORD = credentials('MAIL_PASSWORD')
+}
 
   stages {
     stage('Checkout') {
