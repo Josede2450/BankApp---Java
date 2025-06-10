@@ -21,11 +21,6 @@ environment {
       }
     }
 
-    stage('Build & Test') {
-      steps {
-        bat '.\\mvnw.cmd clean install -DskipTests=false'
-      }
-    }
 
     stage('Build & Test') {
       steps {
