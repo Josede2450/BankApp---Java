@@ -27,13 +27,18 @@ environment {
       }
     }
 
-    stage('Run App (Smoke Test)') {
+    stage('Build & Test') {
       steps {
-        bat 'start /B .\\mvnw.cmd spring-boot:run'
-        bat 'timeout /t 15 >nul'  // wait 15 seconds for the app to start
-        bat 'curl --fail http://localhost:8080/actuator/health'
+        withEnv([
+          "DB_URL=${env.DB_URL}",
+          "DB_USERNAME=${env.DB_USERNAME}",
+          "DB_PASSWORD=${env.DB_PASSWORD}"
+        ]) {
+          bat '.\\mvnw.cmd clean install -DskipTests=false'
+        }
       }
     }
+
 
     stage('Cleanup') {
       steps {
