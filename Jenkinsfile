@@ -58,9 +58,14 @@ pipeline {
     }
   }
 
-  post {
-    always {
-      junit '**/target/surefire-reports/*.xml'
+post {
+  always {
+    script {
+      if (fileExists('target/surefire-reports')) {
+        junit 'target/surefire-reports/*.xml'
+      } else {
+        echo 'No surefire reports found to archive.'
+      }
     }
   }
 }
